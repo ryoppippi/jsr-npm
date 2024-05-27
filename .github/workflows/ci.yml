@@ -35,7 +35,6 @@ jobs:
           version: 8
       - uses: oven-sh/setup-bun@v1
       - run: corepack enable yarn
-      - run: npm i -g --force yarn # upgrade yarn
 
       - run: npm i
       - run: npm run build --if-present
@@ -59,7 +58,6 @@ jobs:
         with:
           version: 8
       - run: corepack enable yarn
-      - run: npm i -g --force yarn # upgrade yarn
 
       - run: npm i
       - run: npm run build --if-present
