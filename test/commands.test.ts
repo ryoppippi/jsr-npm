@@ -484,7 +484,7 @@ describe("install", () => {
       );
     });
 
-    it.only("overwrite detection with arg from npm_config_user_agent", async () => {
+    it("overwrite detection with arg from npm_config_user_agent", async () => {
       await withTempEnv(
         ["i", "--npm", "@std/encoding@0.216.0"],
         async (dir) => {
