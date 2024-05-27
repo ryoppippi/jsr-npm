@@ -209,30 +209,6 @@ export async function getPkgManager(
 
   const result = pkgManagerName || fromEnv || fromLockfile || "npm";
 
-  // There is a long standing bug in yarn that it doesn't update the
-  // `npm_config_registry` environment variable when it detects an
-  // `.npmrc` file. This leads to weird behavior when you run a script
-  // with yarn, that in turn shells out to npm. This only occurs on
-  // windows strangely.
-  // See https://github.com/yarnpkg/yarn/issues/2091#issuecomment-288890717
-  if (
-    result !== "yarn" &&
-    process.env.npm_config_registry === "https://registry.yarnpkg.com"
-  ) {
-    const res = process.env.npm_config_registry = await exec(
-      "npm",
-      [
-        "config",
-        "get",
-        "registry",
-      ],
-      process.cwd(),
-      undefined,
-      true,
-    );
-    process.env.npm_config_registry = res;
-  }
-
   let pkgManager: PackageManager;
   if (result === "yarn") {
     pkgManager = await isYarnBerry(projectDir)
