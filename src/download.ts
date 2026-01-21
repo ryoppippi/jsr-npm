@@ -12,7 +12,6 @@ const { async } = StreamZipPkg;
 const streamFinished = util.promisify(stream.finished);
 
 const DENO_CANARY_INFO_URL = "https://dl.deno.land/canary-latest.txt";
-const DENO_RELEASE_INFO_URL = "https://dl.deno.land/release-latest.txt";
 
 // Example: https://github.com/denoland/deno/releases/download/v1.41.0/deno-aarch64-apple-darwin.zip
 // Example: https://dl.deno.land/canary/d722de886b85093eeef08d1e9fd6f3193405762d/deno-aarch64-apple-darwin.zip
@@ -41,23 +40,7 @@ export async function getDenoDownloadUrl(
 
   const name = FILENAMES[key];
   const filename = name + ".zip";
-
-  const url = canary ? DENO_CANARY_INFO_URL : DENO_RELEASE_INFO_URL;
-  const res = await fetch(url);
-  if (!res.ok) {
-    await res.body?.cancel();
-    throw new Error(
-      `${res.status}: Unable to retrieve ${
-        canary ? "canary" : "release"
-      } version information from ${url}.`,
-    );
-  }
-  let version = (await res.text()).trim();
-  // TODO(bartlomieju): temporary workaround for https://github.com/jsr-io/jsr-npm/issues/129
-  // until it's fixed upstream in Deno
-  if (!canary) {
-    version = "v2.3.7";
-  }
+  const version = await getDenoVersionToDownload(canary);
 
   return {
     canary,
@@ -67,6 +50,26 @@ export async function getDenoDownloadUrl(
     filename,
     version: version,
   };
+}
+
+async function getDenoVersionToDownload(canary: boolean) {
+  if (canary) {
+    return await getLatestCanary();
+  } else {
+    return "v2.6.5";
+  }
+}
+
+async function getLatestCanary() {
+  const url = DENO_CANARY_INFO_URL;
+  const res = await fetch(url);
+  if (!res.ok) {
+    await res.body?.cancel();
+    throw new Error(
+      `${res.status}: Unable to retrieve canary version information from ${url}.`,
+    );
+  }
+  return (await res.text()).trim();
 }
 
 export async function downloadDeno(

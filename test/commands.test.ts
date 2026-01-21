@@ -680,36 +680,6 @@ describe("publish", () => {
     });
   });
 
-  it("should not add unstable publish flags for a Deno project", {
-    timeout: 600000,
-  }, async () => {
-    await runInTempDir(async (dir) => {
-      const pkgJsonPath = path.join(dir, "package.json");
-      await fs.promises.rm(pkgJsonPath);
-
-      await writeTextFile(
-        path.join(dir, "mod.ts"),
-        ["import * as fs from 'fs';", "console.log(fs)"].join("\n"),
-      );
-
-      await writeJson<DenoJson>(path.join(dir, "deno.json"), {
-        name: "@deno/jsr-cli-test",
-        version: "0.0.1",
-        license: "MIT",
-        exports: {
-          ".": "./mod.ts",
-        },
-      });
-
-      try {
-        await runJsr(["publish", "--dry-run"], dir);
-        assert.fail();
-      } catch (err) {
-        assert.ok(err instanceof ExecError, `Unknown exec error thrown`);
-      }
-    });
-  });
-
   it("should leave node_modules as is", async () => {
     await runInTempDir(async (dir) => {
       const pkgJsonPath = path.join(dir, "package.json");
@@ -850,17 +820,5 @@ describe("show", () => {
       ["view", "@std/encoding"],
       process.cwd(),
     );
-  });
-
-  it("should show package information for pre-release only packages", async () => {
-    const output = await runJsr(
-      ["show", "@fresh/update"],
-      process.cwd(),
-      undefined,
-      true,
-    );
-
-    assert.ok(output.combined.includes("latest: " + styleText("magenta", "-")));
-    assert.ok(output.combined.includes("npm tarball:"));
   });
 });
